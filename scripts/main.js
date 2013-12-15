@@ -6,17 +6,43 @@ var keysDown = {};
 var car = {
   width:50,
   height:100,
-  angle:0,
-  positionX:500,
-  positionY:500,
+  angle:0.75*TWO_PI,
+  positionX:750,
+  positionY:150,
   velocityX:0,
   velocityY:0,
   angularVelocity:0,
-  drag:0.99,
-  angularDrag:0.9,
-  power:1000,
+  drag:0.95,
+  angularDrag:0.85,
+  power:3000,
   turnSpeed:30
 };
+var roads = [
+  {
+    type:'horizontal',
+    start:0,
+    end:1000,
+    y:0
+  },
+  {
+    type:'horizontal',
+    start:0,
+    end:500,
+    y:-1000
+  },
+  {
+    type:'circular',
+    center:[500,-1350],
+    arc:[1.5*Math.PI, Math.PI/2],
+    radius:500
+  },
+  {
+    type:'circular',
+    center:[0,-350],
+    arc:[Math.PI/2, 1.5*Math.PI],
+    radius:500
+  }
+];
 
 function setup() {
   setupRAF();
@@ -75,12 +101,36 @@ function update(dt) {
 function draw() {
   var vpm = viewportModifier;
   ctx.clearRect(0, 0, width*vpm, height*vpm);
-  ctx.fillStyle="#FF0000";
+
+  ctx.translate(width*vpm/2, height*vpm/2);
+  ctx.translate(-car.positionX*vpm, -car.positionY*vpm);
+  roads.forEach(function(road) {
+    if(road.type === 'horizontal') {
+      var roadLength = road.end-road.start;
+      ctx.fillStyle='black';
+      ctx.fillRect(road.start*vpm, road.y*vpm, roadLength*vpm, 300*vpm);
+    }
+    else if(road.type === 'circular') {
+      ctx.fillStyle = 'green';
+      ctx.beginPath();
+      ctx.arc(road.center[0]*vpm, road.center[1]*vpm, (road.radius+150)*vpm, road.arc[0], road.arc[0]+Math.PI);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(road.center[0]*vpm, road.center[1]*vpm, (road.radius+150)*vpm, road.arc[1]-Math.PI, road.arc[1]);
+      ctx.fill();
+      ctx.fillStyle = 'white';
+      ctx.beginPath();
+      ctx.arc(road.center[0]*vpm, road.center[1]*vpm, (road.radius-150)*vpm, 0, TWO_PI);
+      ctx.fill();
+    }
+  });
   ctx.translate(car.positionX*vpm, car.positionY*vpm);
+
   ctx.rotate(car.angle);
+  ctx.fillStyle='#FF0000';
   ctx.fillRect(-car.width/2*vpm, -car.height/2*vpm, car.width*vpm, car.height*vpm);
   ctx.rotate(-car.angle);
-  ctx.translate(-car.positionX*vpm, -car.positionY*vpm);
+  ctx.translate(-width*vpm/2, -height*vpm/2);
 }
 
 var viewportWidth, viewportHeight;
