@@ -100,9 +100,9 @@ function update(dt) {
 
 function draw() {
   var vpm = viewportModifier;
-  ctx.clearRect(0, 0, width*vpm, height*vpm);
+  ctx.clearRect(0, 0, viewportHeight, viewportHeight);
 
-  ctx.translate(width*vpm/2, height*vpm/2);
+  ctx.translate(viewportWidth/2, viewportHeight/2);
   ctx.translate(-car.positionX*vpm, -car.positionY*vpm);
   roads.forEach(function(road) {
     if(road.type === 'horizontal') {
@@ -113,10 +113,10 @@ function draw() {
     else if(road.type === 'circular') {
       ctx.fillStyle = 'green';
       ctx.beginPath();
-      ctx.arc(road.center[0]*vpm, road.center[1]*vpm, (road.radius+150)*vpm, road.arc[0], road.arc[0]+Math.PI);
+      ctx.arc(road.center[0]*vpm, road.center[1]*vpm, (road.radius+150)*vpm, road.arc[0], road.arc[0]+Math.PI, road.ctrClockwise);
       ctx.fill();
       ctx.beginPath();
-      ctx.arc(road.center[0]*vpm, road.center[1]*vpm, (road.radius+150)*vpm, road.arc[1]-Math.PI, road.arc[1]);
+      ctx.arc(road.center[0]*vpm, road.center[1]*vpm, (road.radius+150)*vpm, road.arc[1]-Math.PI, road.arc[1], road.ctrClockwise);
       ctx.fill();
       ctx.fillStyle = 'white';
       ctx.beginPath();
@@ -130,7 +130,7 @@ function draw() {
   ctx.fillStyle='#FF0000';
   ctx.fillRect(-car.width/2*vpm, -car.height/2*vpm, car.width*vpm, car.height*vpm);
   ctx.rotate(-car.angle);
-  ctx.translate(-width*vpm/2, -height*vpm/2);
+  ctx.translate(-viewportWidth/2, -viewportHeight/2);
 }
 
 var viewportWidth, viewportHeight;
