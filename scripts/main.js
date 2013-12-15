@@ -8,7 +8,7 @@ var car = {
   height:100,
   angle:0.75*TWO_PI,
   positionX:750,
-  positionY:150,
+  positionY:75,
   velocityX:0,
   velocityY:0,
   angularVelocity:0,
@@ -40,9 +40,9 @@ var roads = [
   {
     type:'circular',
     center:[500,-1350],
-    arc:[0.5*Math.PI, 1.5*Math.PI],
+    arc:[1.5*Math.PI, 0.5*Math.PI],
     radius:500,
-    ctrClockwise:true
+    ctrClockwise:false
   },
   {
     type:'circular',
@@ -50,10 +50,53 @@ var roads = [
     arc:[0.5*Math.PI, 1.5*Math.PI],
     radius:500,
     ctrClockwise:false
+  },
+  {
+    type:'vertical',
+    start:-2850,
+    end:-350,
+    x:1850
+  },
+  {
+    type:'circular',
+    center:[1700,-2850],
+    arc:[Math.PI, 0],
+    radius:300,
+    ctrClockwise:false
+  },
+  {
+    type:'circular',
+    center:[1100,-2850],
+    arc:[0, Math.PI],
+    radius:300,
+    ctrClockwise:false
+  },
+  {
+    type:'circular',
+    center:[500,-2850],
+    arc:[Math.PI, 0],
+    radius:300,
+    ctrClockwise:false
+  },
+  {
+    type:'circular',
+    center:[-400,-2850],
+    arc:[0, Math.PI],
+    radius:600,
+    ctrClockwise:false
+  },
+  {
+    type:'vertical',
+    start:-4000,
+    end:-2850,
+    x:-1150
   }
 ];
+var timeLeft = 60000;
+var carImg;
 
 function setup() {
+  carImg = document.getElementById('car-img');
   setupRAF();
   viewport = document.getElementById('viewport');
   ctx = viewport.getContext('2d');
@@ -82,6 +125,7 @@ function frame() {
 function update(dt) {
   fps = ~~(1000/dt);
   elapsedSeconds = dt/1000;
+  timeLeft -= dt;
 
   if(keysDown[38]) { // forward
     car.velocityY -= Math.cos(car.angle)*car.power*elapsedSeconds;
@@ -109,30 +153,41 @@ function update(dt) {
         break;
       }
     }
+    else if(road.type==='vertical') {
+      if(car.positionY<=road.end && car.positionY>=road.start
+        && car.positionX<=road.x+300 && car.positionX>=road.x) {
+        onRoad = true;
+        break;
+      }
+    }
     else if(road.type==='circular') {
       var fromCenter = [road.center[0]-car.positionX, road.center[1]-car.positionY];
       var distFromCenter = distance(road.center[0], road.center[1], car.positionX, car.positionY);
       var angle = Math.atan2(fromCenter[1], fromCenter[0])+Math.PI;
       if(distFromCenter<=road.radius+150 && distFromCenter>=road.radius-150) {
-        if(road.ctrClockwise) {
-          if(angle>=0 && angle<=Math.PI) {
-            angle = Math.abs(angle-Math.PI);
-          }
-          else {
-            angle = 3*Math.PI-angle;
+        if(road.arc[1]>road.arc[0]) {
+          if(angle<=road.arc[1] && angle>=road.arc[0]) {
+            onRoad = true;
+            break;
           }
         }
-        if(angle<=road.arc[1] && angle>=road.arc[0]) {
-          onRoad = true;
-          break;
+        else {
+          if(angle > Math.PI)
+            angle -= Math.PI;
+          else
+            angle += Math.PI;
+          if(angle<=road.arc[0] && angle>=road.arc[1]) {
+            onRoad = true;
+            break;
+          }
         }
       }
     }
   }
 
   if(!onRoad) {
-    car.velocityX*=0.5;
-    car.velocityY*=0.5;
+    car.velocityX*=0.25;
+    car.velocityY*=0.25;
   }
 
   car.positionX += car.velocityX*elapsedSeconds;
@@ -149,14 +204,42 @@ function draw() {
 
   ctx.translate(viewportWidth/2, viewportHeight/2);
   ctx.translate(-car.positionX*vpm, -car.positionY*vpm);
+  ctx.beginPath();
   roads.forEach(function(road) {
     if(road.type === 'horizontal') {
       var roadLength = road.end-road.start;
       ctx.fillStyle='black';
       ctx.fillRect(road.start*vpm, road.y*vpm, roadLength*vpm, 300*vpm);
+      ctx.strokeStyle = 'yellow';
+      ctx.beginPath();
+      ctx.moveTo(road.start*vpm, (road.y+145)*vpm);
+      ctx.lineTo(road.end*vpm, (road.y+145)*vpm);
+      ctx.lineWidth = 5;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(road.start*vpm, (road.y+155)*vpm);
+      ctx.lineTo(road.end*vpm, (road.y+155)*vpm);
+      ctx.lineWidth = 5;
+      ctx.stroke();
+    }
+    else if(road.type === 'vertical') {
+      var roadLength = road.end-road.start;
+      ctx.fillStyle='black';
+      ctx.fillRect(road.x*vpm, road.start*vpm, 300*vpm, roadLength*vpm);
+      ctx.strokeStyle = 'yellow';
+      ctx.beginPath();
+      ctx.moveTo((road.x+145)*vpm, road.start*vpm);
+      ctx.lineTo((road.x+145)*vpm, road.end*vpm);
+      ctx.lineWidth = 5;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo((road.x+155)*vpm, road.start*vpm);
+      ctx.lineTo((road.x+155)*vpm, road.end*vpm);
+      ctx.lineWidth = 5;
+      ctx.stroke();
     }
     else if(road.type === 'circular') {
-      ctx.fillStyle = 'green';
+      ctx.fillStyle = 'black';
       ctx.beginPath();
       ctx.arc(road.center[0]*vpm, road.center[1]*vpm, (road.radius+150)*vpm, road.arc[0], road.arc[0]+Math.PI, road.ctrClockwise);
       ctx.fill();
@@ -167,15 +250,33 @@ function draw() {
       ctx.beginPath();
       ctx.arc(road.center[0]*vpm, road.center[1]*vpm, (road.radius-150)*vpm, 0, TWO_PI);
       ctx.fill();
+      ctx.strokeStyle = 'yellow';
+      ctx.beginPath();
+      ctx.arc(road.center[0]*vpm, road.center[1]*vpm, (road.radius+5)*vpm, road.arc[0], road.arc[1], road.ctrClockwise);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(road.center[0]*vpm, road.center[1]*vpm, (road.radius-5)*vpm, road.arc[0], road.arc[1], road.ctrClockwise);
+      ctx.stroke();
     }
   });
-  ctx.translate(car.positionX*vpm, car.positionY*vpm);
+  
+  ctx.font='20px Georgia';
+  ctx.fillStyle='red';
+  ctx.fillText('path for cheaters',-200,-1350);
 
+  ctx.translate(car.positionX*vpm, car.positionY*vpm);
   ctx.rotate(car.angle);
   ctx.fillStyle='#FF0000';
-  ctx.fillRect(-car.width/2*vpm, -car.height/2*vpm, car.width*vpm, car.height*vpm);
+  ctx.drawImage(carImg, -car.width/2*vpm, -car.height/2*vpm, car.width*vpm, car.height*vpm);
   ctx.rotate(-car.angle);
   ctx.translate(-viewportWidth/2, -viewportHeight/2);
+
+  ctx.fillStyle = 'black';
+  ctx.strokeStyle = 'white';
+  ctx.beginPath();
+  ctx.font='20px Georgia';
+  ctx.strokeText(timeLeft,50,50);
+  ctx.fillText(timeLeft,50,50);
 }
 
 var viewportWidth, viewportHeight;

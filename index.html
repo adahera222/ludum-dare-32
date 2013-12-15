@@ -12,6 +12,9 @@
       .wrapper {
         text-align: center;
       }
+      .hidden {
+        display: none;
+      }
     </style>
   </head>
 
@@ -19,6 +22,7 @@
     <div class='wrapper'>
       <canvas id='viewport' width='800' height='600'></canvas>
     </div>
+    <img class='hidden' id='car-img' src='images/car.png'>
     <script>document.onkeydown = function(e) {e.preventDefault()}</script>
     <script src='scripts/jquery.min.js'></script>
     <script src='scripts/main.js'></script>
