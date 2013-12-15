@@ -19,6 +19,13 @@ var car = {
 };
 var roads = [
   {
+    type:'circular',
+    center:[500,-350],
+    arc:[0, 1.5*Math.PI],
+    radius:1500,
+    ctrClockwise:false
+  },
+  {
     type:'horizontal',
     start:0,
     end:1000,
@@ -33,14 +40,16 @@ var roads = [
   {
     type:'circular',
     center:[500,-1350],
-    arc:[1.5*Math.PI, Math.PI/2],
-    radius:500
+    arc:[0.5*Math.PI, 1.5*Math.PI],
+    radius:500,
+    ctrClockwise:true
   },
   {
     type:'circular',
     center:[0,-350],
-    arc:[Math.PI/2, 1.5*Math.PI],
-    radius:500
+    arc:[0.5*Math.PI, 1.5*Math.PI],
+    radius:500,
+    ctrClockwise:false
   }
 ];
 
@@ -90,6 +99,42 @@ function update(dt) {
     car.angularVelocity += car.turnSpeed*elapsedSeconds;
   }
 
+  var onRoad = false;
+  for(var i=0; i<roads.length; i++) {
+    var road = roads[i];
+    if(road.type==='horizontal') {
+      if(car.positionX<=road.end && car.positionX>=road.start
+        && car.positionY<=road.y+300 && car.positionY>=road.y) {
+        onRoad = true;
+        break;
+      }
+    }
+    else if(road.type==='circular') {
+      var fromCenter = [road.center[0]-car.positionX, road.center[1]-car.positionY];
+      var distFromCenter = distance(road.center[0], road.center[1], car.positionX, car.positionY);
+      var angle = Math.atan2(fromCenter[1], fromCenter[0])+Math.PI;
+      if(distFromCenter<=road.radius+150 && distFromCenter>=road.radius-150) {
+        if(road.ctrClockwise) {
+          if(angle>=0 && angle<=Math.PI) {
+            angle = Math.abs(angle-Math.PI);
+          }
+          else {
+            angle = 3*Math.PI-angle;
+          }
+        }
+        if(angle<=road.arc[1] && angle>=road.arc[0]) {
+          onRoad = true;
+          break;
+        }
+      }
+    }
+  }
+
+  if(!onRoad) {
+    car.velocityX*=0.5;
+    car.velocityY*=0.5;
+  }
+
   car.positionX += car.velocityX*elapsedSeconds;
   car.positionY += car.velocityY*elapsedSeconds;
   car.velocityX *= car.drag;
@@ -100,7 +145,7 @@ function update(dt) {
 
 function draw() {
   var vpm = viewportModifier;
-  ctx.clearRect(0, 0, viewportHeight, viewportHeight);
+  ctx.clearRect(0, 0, viewportWidth, viewportHeight);
 
   ctx.translate(viewportWidth/2, viewportHeight/2);
   ctx.translate(-car.positionX*vpm, -car.positionY*vpm);
@@ -174,5 +219,9 @@ addEventListener("keydown", function (e) {
 addEventListener("keyup", function (e) {
   delete keysDown[e.keyCode];
 }, false);
+
+function distance(x1, y1, x2, y2) {
+  return Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+}
 
 setup();
