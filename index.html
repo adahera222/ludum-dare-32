@@ -27,6 +27,12 @@
         background-color: lightblue;
         padding: 15px;
       }
+      #win {
+        display: none;
+      }
+      #lose {
+        display: none;
+      }
     </style>
   </head>
 
@@ -34,7 +40,7 @@
     <div class='wrapper'>
       <canvas id='viewport' width='800' height='600'></canvas>
     </div>
-    <div class='prompt'>
+    <div id='start' class='prompt'>
       <div>
         <h1>Oh no!</h1>
         <p>Child Protective Services is coming to check in, and you forgot your child at the supermarket!</p>
@@ -43,6 +49,20 @@
         <p>Oh, and in case you forgot, your child looks like this:</p>
         <img id='child-img' src='images/child.png'>
         <h2>Click anywhere to begin.</h2>
+      </div>
+    </div>
+    <div id='win' class='prompt'>
+      <div>
+        <h1>You Win!</h1>
+        <p>You can keep your child! That was close though. You probably shouldn't leave your child at the store next time.</p>
+        <h2>Click anywhere to try again.</h2>
+      </div>
+    </div>
+    <div id='lose' class='prompt'>
+      <div>
+        <h1>You Lose</h1>
+        <p>You weren't able to get your child home in time, and lost custody. It's probably for the best, admittedly.</p>
+        <h2>Click anywhere to try again.</h2>
       </div>
     </div>
     <img class='hidden' id='car-img' src='images/car.png'>
