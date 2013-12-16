@@ -15,12 +15,35 @@
       .hidden {
         display: none;
       }
+      .prompt {
+        position: absolute;
+        top: 0;
+        width: 100%;
+        font-family: Helvetica;
+        font-size: 16px;
+      }
+      .prompt div {
+        margin: 20px 10%;
+        background-color: lightblue;
+        padding: 15px;
+      }
     </style>
   </head>
 
   <body>
     <div class='wrapper'>
       <canvas id='viewport' width='800' height='600'></canvas>
+    </div>
+    <div class='prompt'>
+      <div>
+        <h1>Oh no!</h1>
+        <p>Child Protective Services is coming to check in, and you forgot your child at the supermarket!</p>
+        <p>The roads are icy and everything else is covered in a foot of snow.</p>
+        <p>Use the arrow keys to drive, but be sure to move fast! You only have one minute before CPS comes.</p>
+        <p>Oh, and in case you forgot, your child looks like this:</p>
+        <img id='child-img' src='images/child.png'>
+        <h2>Click anywhere to begin.</h2>
+      </div>
     </div>
     <img class='hidden' id='car-img' src='images/car.png'>
     <script>document.onkeydown = function(e) {e.preventDefault()}</script>

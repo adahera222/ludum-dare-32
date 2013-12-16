@@ -94,9 +94,12 @@ var roads = [
 ];
 var timeLeft = 60000;
 var carImg;
+var childImg;
+var childTaken = false;
 
 function setup() {
   carImg = document.getElementById('car-img');
+  childImg = document.getElementById('child-img');
   setupRAF();
   viewport = document.getElementById('viewport');
   ctx = viewport.getContext('2d');
@@ -106,10 +109,16 @@ function setup() {
   resize();
   $(window).on('resize', resize);
 
-  start();
+  $(window).on('click', start);
 }
 
 function start() {
+  $('.prompt').hide();
+  timeLeft = 60000;
+  car.positionX = 750;
+  car.positionY = 75;
+  childTaken = false;
+
   then = Date.now();
   requestAnimationFrame(frame);
 }
@@ -186,8 +195,8 @@ function update(dt) {
   }
 
   if(!onRoad) {
-    car.velocityX*=0.25;
-    car.velocityY*=0.25;
+    // car.velocityX*=0.25;
+    // car.velocityY*=0.25;
   }
 
   car.positionX += car.velocityX*elapsedSeconds;
@@ -196,6 +205,10 @@ function update(dt) {
   car.velocityY *= car.drag;
   car.angle += car.angularVelocity*elapsedSeconds;
   car.angularVelocity *= car.angularDrag;
+
+  if(car.positionX<=-950 && car.positionX>=-1050 && car.positionY<=-3850 && car.positionY>=-3950) {
+    childTaken = true;
+  }
 }
 
 function draw() {
@@ -214,12 +227,12 @@ function draw() {
       ctx.beginPath();
       ctx.moveTo(road.start*vpm, (road.y+145)*vpm);
       ctx.lineTo(road.end*vpm, (road.y+145)*vpm);
-      ctx.lineWidth = 5;
+      ctx.lineWidth = 5*vpm;
       ctx.stroke();
       ctx.beginPath();
       ctx.moveTo(road.start*vpm, (road.y+155)*vpm);
       ctx.lineTo(road.end*vpm, (road.y+155)*vpm);
-      ctx.lineWidth = 5;
+      ctx.lineWidth = 5*vpm;
       ctx.stroke();
     }
     else if(road.type === 'vertical') {
@@ -230,12 +243,12 @@ function draw() {
       ctx.beginPath();
       ctx.moveTo((road.x+145)*vpm, road.start*vpm);
       ctx.lineTo((road.x+145)*vpm, road.end*vpm);
-      ctx.lineWidth = 5;
+      ctx.lineWidth = 5*vpm;
       ctx.stroke();
       ctx.beginPath();
       ctx.moveTo((road.x+155)*vpm, road.start*vpm);
       ctx.lineTo((road.x+155)*vpm, road.end*vpm);
-      ctx.lineWidth = 5;
+      ctx.lineWidth = 5*vpm;
       ctx.stroke();
     }
     else if(road.type === 'circular') {
@@ -260,23 +273,31 @@ function draw() {
     }
   });
   
-  ctx.font='20px Georgia';
+  ctx.font=(30*vpm)+'px Helvetica';
   ctx.fillStyle='red';
-  ctx.fillText('path for cheaters',-200,-1350);
+  ctx.fillText('path for cheaters',-150*vpm,-2025*vpm);
+
+  if(!childTaken) {
+    ctx.drawImage(childImg, -1000*vpm, -3900*vpm, 50*vpm, 50*vpm);
+  }
 
   ctx.translate(car.positionX*vpm, car.positionY*vpm);
   ctx.rotate(car.angle);
   ctx.fillStyle='#FF0000';
   ctx.drawImage(carImg, -car.width/2*vpm, -car.height/2*vpm, car.width*vpm, car.height*vpm);
+  if(childTaken) {
+    ctx.drawImage(childImg, -car.width/2*vpm, 0, 50*vpm, 50*vpm);
+  }
   ctx.rotate(-car.angle);
   ctx.translate(-viewportWidth/2, -viewportHeight/2);
 
   ctx.fillStyle = 'black';
   ctx.strokeStyle = 'white';
   ctx.beginPath();
-  ctx.font='20px Georgia';
-  ctx.strokeText(timeLeft,50,50);
-  ctx.fillText(timeLeft,50,50);
+  ctx.font=(30*vpm)+'px Helvetica';
+  var secs = ~~(timeLeft/1000);
+  ctx.strokeText(secs+' seconds',50*vpm,50*vpm);
+  ctx.fillText(secs+' seconds',50*vpm,50*vpm);
 }
 
 var viewportWidth, viewportHeight;
